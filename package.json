@@ -10,7 +10,7 @@
   "scripts": {
     "dev": "next dev -p 3000",
     "build": "next build",
-    "start": "next start -p 3000",
+    "start": "node .next/standalone/server.js",
     "worker": "tsx src/lib/jobs/worker-main.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx src/lib/db/migrate.ts",
@@ -21,7 +21,8 @@
     "test:e2e": "playwright test",
     "typecheck": "tsc --noEmit",
     "lint": "next lint",
-    "check": "npm run typecheck && npm test && node --check bridge/school-os-bridge.mjs"
+    "check": "npm run typecheck && npm test && node --check bridge/school-os-bridge.mjs",
+    "start:next": "next start -p 3000"
   },
   "dependencies": {
     "@electric-sql/pglite": "0.5.7",
@@ -32,6 +33,7 @@
     "pg": "8.23.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",
+    "tsx": "^4.20.0",
     "web-push": "3.6.7",
     "zod": "4.4.3"
   },
@@ -46,7 +48,6 @@
     "@types/web-push": "3.6.4",
     "drizzle-kit": "0.31.10",
     "tailwindcss": "4.3.3",
-    "tsx": "^4.20.0",
     "typescript": "^5.9.0",
     "vitest": "4.1.11"
   }

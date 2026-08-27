@@ -27,6 +27,10 @@ const csp = [
 ].join('; ');
 
 const nextConfig: NextConfig = {
+  // Emits .next/standalone: a self-contained server with only the modules it
+  // actually traced. Turns a ~1GB image into a ~200MB one and removes the need
+  // to ship node_modules.
+  output: 'standalone',
   reactStrictMode: true,
   poweredByHeader: false,
   serverExternalPackages: ['@electric-sql/pglite', 'pg', 'web-push'],

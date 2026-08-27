@@ -1,0 +1,13 @@
+node_modules
+.next
+.git
+.data
+storage
+test-results
+playwright-report
+e2e/.auth
+e2e/.last-mail.txt
+*.log
+.env
+.env.local
+.env*.local

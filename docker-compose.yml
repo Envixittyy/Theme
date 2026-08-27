@@ -1,0 +1,67 @@
+# A complete single-node deployment: database, web, worker.
+#
+#   cp .env.example .env      # fill in the values marked required
+#   docker compose up -d --build
+#   docker compose run --rm migrate
+#
+# For more than one node, move Postgres to a managed service and set S3_* so the
+# web processes stop relying on a shared local volume.
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: schoolos
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: schoolos
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U schoolos']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Runs once, before the app starts, and exits. Kept separate so a deploy can
+  # apply migrations without a running web process racing them.
+  migrate:
+    build: .
+    profiles: ['tools']
+    working_dir: /app/worker
+    command: ['npm', 'run', 'db:migrate']
+    env_file: [.env]
+    environment:
+      DATABASE_URL: postgres://schoolos:${POSTGRES_PASSWORD}@db:5432/schoolos
+    depends_on:
+      db: { condition: service_healthy }
+
+  web:
+    build: .
+    restart: unless-stopped
+    ports: ['3000:3000']
+    env_file: [.env]
+    environment:
+      DATABASE_URL: postgres://schoolos:${POSTGRES_PASSWORD}@db:5432/schoolos
+    volumes:
+      - attachments:/app/storage
+    depends_on:
+      db: { condition: service_healthy }
+
+  # Polling, reminders, digests and push delivery. Same image, same secrets.
+  worker:
+    build: .
+    restart: unless-stopped
+    working_dir: /app/worker
+    command: ['npm', 'run', 'worker']
+    env_file: [.env]
+    environment:
+      DATABASE_URL: postgres://schoolos:${POSTGRES_PASSWORD}@db:5432/schoolos
+    volumes:
+      - attachments:/app/storage
+    depends_on:
+      db: { condition: service_healthy }
+
+volumes:
+  pgdata:
+  attachments:

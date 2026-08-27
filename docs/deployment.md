@@ -29,17 +29,82 @@ without duplicating a sync.
   to `LOCAL_STORAGE_DIR`, which needs a persistent volume shared by every web
   process — fine on one node, wrong on several.
 
-## Steps
+## Pick a path
+
+### 1 · One server with Docker Compose — recommended
+
+Everything the app needs, on one box, in three commands. A `Dockerfile` and
+`docker-compose.yml` are in the repository.
+
+```bash
+cp .env.example .env          # fill in the five required values below
+docker compose up -d --build
+docker compose run --rm migrate
+```
+
+That gives you Postgres, the web server on :3000, and the worker. Put a reverse
+proxy with TLS in front (Caddy needs two lines; nginx a few more) and point
+`APP_URL` at the public hostname.
+
+To deploy a new version:
+
+```bash
+git pull
+docker compose build
+docker compose run --rm migrate    # migrations are additive; safe while serving
+docker compose up -d
+```
+
+### 2 · A platform with separate services — Railway, Render, Fly.io
+
+These fit the two-process shape directly. Create three things:
+
+| | Command | Notes |
+| --- | --- | --- |
+| Postgres | — | Use the platform's managed instance |
+| **web** | `npm start` | Build command `npm run build`; port 3000 |
+| **worker** | `npm --prefix . run worker` | No port, no health check |
+
+Give **both** services the same environment. The worker decrypts feed URLs to
+poll them, so it needs `SECRET_ENCRYPTION_KEYS` just as much as the web process
+does. Run `npm run db:migrate` as a release/pre-deploy command.
+
+### 3 · Vercel — works, with one caveat worth knowing first
+
+The web half deploys cleanly. The worker does not: Vercel has no long-running
+process, and this app's polling, reminder scans and push delivery live in one.
+
+Two honest options:
+
+- **Vercel Cron.** `GET /api/cron/drain` runs one batch of queued jobs. Set
+  `CRON_SECRET` and have the scheduler send it as a bearer token; without the
+  variable the route returns 501 and stays disabled. Add to `vercel.json`:
+
+  ```json
+  { "crons": [{ "path": "/api/cron/drain", "schedule": "*/5 * * * *" }] }
+  ```
+
+  Reminder resolution is then bounded by the cron interval rather than by the
+  reminder, and Vercel's free tier allows only daily crons.
+- **Worker elsewhere.** Run the worker container on any small always-on host
+  pointed at the same database. This is the arrangement I would choose.
+
+Either way, attachments need `S3_*` set: Vercel's filesystem is ephemeral, so the
+local storage adapter would lose files between deploys.
+
+## Manual deployment, without containers
 
 ```bash
 npm ci
 npm run build
-npm run db:migrate      # run once per release, before starting the new version
-npm start               # web
-npm run worker          # worker (separate process)
+npm run db:migrate      # once per release, before starting the new version
+npm start               # web  — serves .next/standalone
+npm run worker          # worker — separate process
 ```
 
-Migrations are additive and safe to run while the previous version is serving.
+`npm start` runs the standalone server, which carries only the modules Next
+traced. `tsx` is a runtime dependency rather than a dev one precisely so the
+worker and the migration runner work on a production install.
 
 ## Environment
 
@@ -55,6 +120,18 @@ deployment is not production-ready:
 | `MAIL_WEBHOOK_URL` | Without it nobody can sign in except by reading the server log |
 | `VAPID_*` | Without them push is honestly reported as unavailable |
 | `FEED_HOST_ALLOWLIST` | Strongly recommended: pins feed URLs to your institution's hosts |
+
+The five that are genuinely required for a working deployment: `APP_URL`,
+`DATABASE_URL`, `SECRET_ENCRYPTION_KEYS`, `SECRET_ENCRYPTION_ACTIVE_KEY_ID`,
+and a mail transport. Generate the encryption key with:
+
+```bash
+node -e "console.log('k1:' + require('crypto').randomBytes(32).toString('base64'))"
+```
+
+Production start-up fails without an encryption key rather than storing
+integration credentials in the clear. Without a mail transport nobody can sign
+in except by reading the server log.
 
 ## Hardening checklist
 
@@ -86,11 +163,20 @@ deployment is not production-ready:
 
 ## Health checks
 
-- Web: `GET /login` returns 200 without a session.
+- Web: `GET /login` returns 200 without a session. The container image already
+  declares a `HEALTHCHECK` that does exactly this.
 - Worker: no HTTP surface by design. Alert on rows in `jobs` with
   `state = 'dead'`, and on `sync_runs.status = 'failed'`. Both surface in the
   app at Settings → Sync health, so users see problems even if alerting misses
   them.
+
+## After deploying, check these four things
+
+1. `GET /login` returns 200 over HTTPS.
+2. Sign in — proves the mail transport works.
+3. Settings → Integrations, connect a feed and press **Sync now** — proves the
+   worker's encryption keyring matches the web process's.
+4. Settings → Sync health shows the run — proves the worker is alive.
 
 ## Rollback
 
