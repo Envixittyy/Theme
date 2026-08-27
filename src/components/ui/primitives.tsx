@@ -153,7 +153,8 @@ export function StatePanel({
   return (
     <div className={cx('rounded-md border px-3 py-2 text-sm', tone[kind])} role="status">
       <p className="font-medium">{title}</p>
-      {description ? <p className="mt-0.5 text-[13px] opacity-90">{description}</p> : null}
+      {/* No opacity: dimming already-toned text pushed it under 4.5:1. */}
+      {description ? <p className="mt-0.5 text-[13px]">{description}</p> : null}
       {action ? <div className="mt-2">{action}</div> : null}
     </div>
   );

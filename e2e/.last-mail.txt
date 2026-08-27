@@ -1,0 +1,1 @@
+http://127.0.0.1:3100/auth/verify?token=GvtgNARqJjJw5g8tVLUYwHMWLjHFy9KmkhKX5IlLmlY

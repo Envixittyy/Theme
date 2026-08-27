@@ -168,7 +168,10 @@ export function TaskRow({
         </div>
       </div>
 
-      <div className="flex shrink-0 items-center gap-0.5 opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100 md:opacity-0">
+      {/* Always visible where there is no hover to reveal them. Revealing an
+          action on hover is fine on a desktop and makes it unreachable on a
+          phone, which is where most of these get pressed. */}
+      <div className="flex shrink-0 items-center gap-0.5 transition-opacity md:opacity-0 md:focus-within:opacity-100 md:group-hover:opacity-100">
         {!submitted && !done && (
           <button
             type="button"

@@ -113,6 +113,10 @@ export function AttachmentPanel({ taskId, attachments }: { taskId: string; attac
         ref={inputRef}
         type="file"
         className="sr-only"
+        // Triggered by the visible button above, but it is still a form control
+        // and still needs a name for anything reading the page.
+        aria-label="Choose a file to attach"
+        tabIndex={-1}
         onChange={(e) => {
           const file = e.target.files?.[0];
           if (file) void upload(file);

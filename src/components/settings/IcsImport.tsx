@@ -79,6 +79,8 @@ export function IcsImport() {
         type="file"
         accept=".ics,text/calendar"
         className="sr-only"
+        aria-label="Choose an iCalendar file to import"
+        tabIndex={-1}
         onChange={(e) => {
           const file = e.target.files?.[0];
           if (file) void load(file);

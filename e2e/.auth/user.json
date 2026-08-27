@@ -1,0 +1,15 @@
+{
+  "cookies": [
+    {
+      "name": "mos_session",
+      "value": "FntsZ43BXJbdPELBR46hJU2-1NZnm7CCorcTe1MJZog",
+      "domain": "127.0.0.1",
+      "path": "/",
+      "expires": 1790389627.339139,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "Lax"
+    }
+  ],
+  "origins": []
+}

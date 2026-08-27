@@ -54,7 +54,7 @@ export default async function LoginPage({
 
           <SignInForm />
 
-          <p className="mt-8 text-xs text-ink-3">
+          <p className="mt-8 text-xs text-ink-2">
             By signing in you agree that your coursework data is stored on this server. You can export or delete
             everything from{' '}
             <Link href="/settings/data" className="underline">
@@ -71,7 +71,7 @@ export default async function LoginPage({
           <p className="max-w-sm text-2xl font-semibold leading-snug">
             Every deadline, class and announcement — in one place that works offline.
           </p>
-          <ul className="space-y-3 text-sm opacity-90">
+          <ul className="space-y-3 text-sm">
             <li>· Blackboard deadlines sync in without duplicates</li>
             <li>· Two-way Notion sync with conflict review</li>
             <li>· Installs on your iPhone Home Screen</li>

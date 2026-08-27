@@ -588,7 +588,7 @@ function Timetable({
                       <span className="block truncate text-[10.5px] text-ink-2">
                         {formatMinuteOfDay(m.startMinute)}–{formatMinuteOfDay(m.endMinute)}
                       </span>
-                      {m.location && <span className="block truncate text-[10px] text-ink-3">{m.location}</span>}
+                      {m.location && <span className="block truncate text-[10px] text-ink-2">{m.location}</span>}
                     </button>
                   ))}
               </div>

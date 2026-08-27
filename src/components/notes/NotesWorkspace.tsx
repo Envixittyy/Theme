@@ -155,10 +155,20 @@ export function NotesWorkspace({
                           )}
                           <span className="min-w-0 flex-1 truncate text-[13px] font-medium text-ink">{note.title}</span>
                         </div>
-                        <p className="mt-0.5 line-clamp-1 text-[11.5px] text-ink-3">
+                        <p
+                          className={cx(
+                            'mt-0.5 line-clamp-1 text-[11.5px]',
+                            note.id === draft?.id ? 'text-ink-2' : 'text-ink-3',
+                          )}
+                        >
                           {note.body.replace(/[#*`>[\]]/g, '').slice(0, 80) || 'Empty note'}
                         </p>
-                        <p className="numeric mt-0.5 text-[10.5px] text-ink-3">
+                        <p
+                          className={cx(
+                            'numeric mt-0.5 text-[10.5px]',
+                            note.id === draft?.id ? 'text-ink-2' : 'text-ink-3',
+                          )}
+                        >
                           {formatRelative(new Date(note.updatedAt))}
                         </p>
                       </button>

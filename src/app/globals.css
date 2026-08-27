@@ -31,7 +31,10 @@
   /* Ink */
   --c-ink: #241c1a;
   --c-ink-2: #5b4f4a;
-  --c-ink-3: #857771;
+  /* Tertiary text is still text. This value clears 4.5:1 against every light
+     surface it is used on -- 5.4:1 on --c-surface, 4.8:1 on --c-surface-2,
+     4.5:1 on --c-brand-soft -- not merely against the lightest one. */
+  --c-ink-3: #736660;
   --c-ink-invert: #fdf9f5;
 
   /* Lines */
@@ -225,6 +228,13 @@ time,
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* Row actions that reveal on hover must stay put where hover does not exist. */
+@media (hover: none) {
+  .group [class*='group-hover:opacity-100'] {
+    opacity: 1 !important;
   }
 }
 

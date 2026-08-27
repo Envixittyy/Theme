@@ -267,16 +267,17 @@ export function WidgetBody({ widgetKey, data }: { widgetKey: string; data: Today
       const todayKey = isoDateIn(data.now, data.timeZone);
       return (
         <div className="p-3">
-          <div className="grid grid-cols-7 gap-1" role="grid" aria-label="Deadline density, four weeks">
+          {/* A list, not a grid: `role="grid"` requires row structure, and these
+              are 28 links. The label on each cell carries the meaning. */}
+          <ul className="grid grid-cols-7 gap-1" aria-label="Deadline density, four weeks">
             {days.map((d) => {
               const key = isoDateIn(d, data.timeZone);
               const count = counts.get(key) ?? 0;
               const isToday = key === todayKey;
               return (
+                <li key={key}>
                 <Link
-                  key={key}
                   href={`/calendar?date=${key}`}
-                  role="gridcell"
                   aria-label={`${key}, ${count} due`}
                   className={cx(
                     'grid aspect-square place-items-center rounded text-[11px] transition-colors',
@@ -292,9 +293,10 @@ export function WidgetBody({ widgetKey, data }: { widgetKey: string; data: Today
                 >
                   {key.slice(-2)}
                 </Link>
+                </li>
               );
             })}
-          </div>
+          </ul>
           <p className="mt-2 text-[11px] text-ink-3">Shading shows how many deadlines fall on each day.</p>
         </div>
       );
