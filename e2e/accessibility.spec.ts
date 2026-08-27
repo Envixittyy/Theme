@@ -24,14 +24,6 @@ const SCREENS: Array<{ path: string; name: string }> = [
 ];
 
 test.describe('accessibility', () => {
-  test('the sign-in page has no violations', async ({ page }) => {
-    await page.goto('/login');
-    const results = await new AxeBuilder({ page })
-      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
-      .analyze();
-    expect(describe(results.violations)).toEqual([]);
-  });
-
   for (const screen of SCREENS) {
     test(`${screen.name} has no violations`, async ({ page }) => {
       await page.goto(screen.path);

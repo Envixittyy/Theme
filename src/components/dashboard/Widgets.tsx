@@ -64,21 +64,23 @@ export function WidgetBody({ widgetKey, data }: { widgetKey: string; data: Today
             const current = nowMinute >= m.startMinute && nowMinute < m.endMinute;
             const past = nowMinute >= m.endMinute;
             return (
-              <li
-                key={m.id}
-                className={cx('flex items-center gap-3 px-3 py-2.5', past && 'opacity-55')}
-              >
+              <li key={m.id} className="flex items-center gap-3 px-3 py-2.5">
                 <div className="numeric w-[4.75rem] shrink-0 text-right">
-                  <p className="text-[13px] font-semibold text-ink">{formatMinuteOfDay(m.startMinute)}</p>
+                  {/* Past sessions are de-emphasised with colour tokens rather
+                      than opacity: dimming text is what pushes it under the
+                      contrast threshold. */}
+                  <p className={cx('text-[13px] font-semibold', past ? 'text-ink-2' : 'text-ink')}>
+                    {formatMinuteOfDay(m.startMinute)}
+                  </p>
                   <p className="text-[11px] text-ink-3">{formatMinuteOfDay(m.endMinute)}</p>
                 </div>
                 <span
-                  className="h-9 w-1 shrink-0 rounded-full"
+                  className={cx('h-9 w-1 shrink-0 rounded-full', past && 'opacity-40')}
                   style={{ background: m.color }}
                   aria-hidden
                 />
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-[13.5px] font-medium text-ink">
+                  <p className={cx('truncate text-[13.5px] font-medium', past ? 'text-ink-2' : 'text-ink')}>
                     <Link href={`/courses/${m.courseId}`} className="hover:underline">
                       {m.code} — {m.title}
                     </Link>

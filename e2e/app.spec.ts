@@ -32,12 +32,16 @@ test.describe('shell', () => {
 });
 
 test.describe('tasks', () => {
-  test('quick add creates a task with the date it showed in the preview', async ({ page }) => {
+  test('quick add creates a task with the date it showed in the preview', async ({ page }, testInfo) => {
+    // The desktop and mobile projects share one database, so the title has to
+    // be unique per project or the later assertion matches both rows.
+    const title = `Draft the lab conclusion (${testInfo.project.name})`;
+
     await page.goto('/today');
     await page.getByRole('button', { name: /^Add$|Quick add/ }).first().click();
 
     const input = page.getByLabel(/task, with optional|task title/i);
-    await input.fill('Draft the lab conclusion #CHM031 !high tomorrow 5pm');
+    await input.fill(`${title} #CHM031 !high tomorrow 5pm`);
 
     // The parse is echoed before saving, so a misread date is visible. Scoped
     // to the dialog: the course code also appears in the desktop sidebar.
@@ -47,7 +51,7 @@ test.describe('tasks', () => {
 
     await dialog.getByRole('button', { name: 'Add task' }).click();
     await page.goto('/tasks?list=upcoming');
-    await expect(page.getByRole('link', { name: 'Draft the lab conclusion', exact: true })).toBeVisible();
+    await expect(page.getByRole('link', { name: title, exact: true })).toBeVisible();
   });
 
   test('completing and submitting are separate states', async ({ page }) => {
@@ -90,6 +94,30 @@ test.describe('calendar', () => {
   }
 });
 
+test.describe('layout', () => {
+  for (const path of [
+    '/today',
+    '/tasks?list=upcoming',
+    '/courses',
+    '/announcements',
+    '/notes',
+    '/notifications',
+    '/settings',
+    '/settings/sync',
+  ]) {
+    test(`${path} does not scroll the document sideways`, async ({ page }) => {
+      await page.goto(path);
+      await page.waitForLoadState('networkidle');
+      // Wide content must scroll inside its own container. A page that scrolls
+      // sideways on a phone also puts controls out of reach.
+      const overflow = await page.evaluate(
+        () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      );
+      expect(overflow).toBeLessThanOrEqual(1);
+    });
+  }
+});
+
 test.describe('dashboard customisation', () => {
   test('a reordered layout persists and is stored per breakpoint', async ({ page, isMobile }) => {
     await page.goto('/today');
@@ -110,14 +138,15 @@ test.describe('dashboard customisation', () => {
 });
 
 test.describe('offline behaviour', () => {
-  test('a task created offline is queued and reconciled on reconnect', async ({ page, context }) => {
+  test('a task created offline is queued and reconciled on reconnect', async ({ page, context }, testInfo) => {
+    const title = `Written on the train (${testInfo.project.name})`;
     await page.goto('/today');
     // Let the service worker install so the shell is cached.
     await page.waitForTimeout(1500);
 
     await context.setOffline(true);
     await page.getByRole('button', { name: /^Add$|Quick add/ }).first().click();
-    await page.getByLabel(/task, with optional|task title/i).fill('Written on the train');
+    await page.getByLabel(/task, with optional|task title/i).fill(title);
     await page.getByRole('dialog', { name: /quick add task/i }).getByRole('button', { name: 'Add task' }).click();
 
     // The UI says so rather than pretending the write landed.
@@ -131,14 +160,14 @@ test.describe('offline behaviour', () => {
     await expect
       .poll(
         async () =>
-          page.evaluate(async () => {
+          page.evaluate(async (needle: string) => {
             const response = await fetch(
-              '/api/tasks?search=Written%20on%20the%20train&includeCompleted=true',
+              `/api/tasks?search=${encodeURIComponent(needle)}&includeCompleted=true`,
             );
             if (!response.ok) return 0;
             const body = (await response.json()) as { tasks: unknown[] };
             return body.tasks.length;
-          }),
+          }, title),
         { timeout: 30_000, intervals: [500, 1000, 2000] },
       )
       .toBeGreaterThan(0);

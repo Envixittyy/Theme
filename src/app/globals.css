@@ -199,16 +199,32 @@ time,
   border-radius: var(--r-sm);
 }
 
-/* Touch targets: WCAG 2.2 AA target size (minimum) is 24px, but the product
-   requirement here is 44x44 for anything tappable on a phone. */
+/* Touch targets.
+   WCAG 2.2 AA sets 24px as the floor; the product requirement here is 44x44 for
+   anything tappable on a phone.
+   Only `min-height` is enforced globally: a row simply gets taller, which is
+   harmless. Forcing `min-width` on every control was not harmless -- it inflated
+   inline checkboxes and icon buttons, pushed row actions past the viewport edge,
+   and made them unclickable. Width is therefore sized per component, and
+   `.tap-target` is available for anything that needs the full square. */
 @media (pointer: coarse) {
   button,
   [role='button'],
   a[data-tap],
-  input[type='checkbox'],
   summary {
     min-height: 44px;
+  }
+
+  .tap-target {
+    min-height: 44px;
     min-width: 44px;
+  }
+
+  /* Small inline controls get their hit area from padding on the label that
+     wraps them, so the visual size stays right. */
+  input[type='checkbox'] {
+    min-height: 20px;
+    min-width: 20px;
   }
 }
 

@@ -90,13 +90,15 @@ export function TaskRow({
       data-task-id={task.id}
     >
       {onToggleSelect ? (
-        <input
-          type="checkbox"
-          checked={!!selected}
-          onChange={() => onToggleSelect(task.id)}
-          aria-label={`Select ${task.title}`}
-          className="mt-1 h-4 w-4 shrink-0 accent-[var(--c-brand)]"
-        />
+        <label className="-m-2.5 shrink-0 cursor-pointer p-2.5">
+          <input
+            type="checkbox"
+            checked={!!selected}
+            onChange={() => onToggleSelect(task.id)}
+            aria-label={`Select ${task.title}`}
+            className="mt-0.5 h-4 w-4 accent-[var(--c-brand)]"
+          />
+        </label>
       ) : null}
 
       <button
@@ -106,11 +108,21 @@ export function TaskRow({
         aria-pressed={done}
         aria-label={done ? `Mark ${task.title} as not done` : `Mark ${task.title} as done`}
         className={cx(
-          'mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full border transition-colors',
-          done ? 'border-success bg-success text-brand-ink' : 'border-line-strong text-transparent hover:border-brand',
+          // -m-3 p-3 gives a 44px tap area around a 20px circle without
+          // changing how the row looks.
+          'mt-0.5 -m-3 grid shrink-0 place-items-center rounded-full border-0 bg-transparent p-3 transition-colors',
         )}
       >
-        <Icon name="check" size={12} />
+        <span
+          className={cx(
+            'grid h-5 w-5 place-items-center rounded-full border transition-colors',
+            done
+              ? 'border-success bg-success text-brand-ink'
+              : 'border-line-strong text-transparent hover:border-brand',
+          )}
+        >
+          <Icon name="check" size={12} />
+        </span>
       </button>
 
       <div className="min-w-0 flex-1">
@@ -177,7 +189,7 @@ export function TaskRow({
             type="button"
             onClick={() => void setStatus('submitted')}
             disabled={busy}
-            className="grid h-8 w-8 place-items-center rounded-md text-ink-3 hover:bg-surface-2 hover:text-ink"
+            className="grid h-11 w-11 place-items-center rounded-md text-ink-3 hover:bg-surface-2 hover:text-ink md:h-8 md:w-8"
             title="Mark as submitted"
             aria-label={`Mark ${task.title} as submitted`}
           >
@@ -186,7 +198,7 @@ export function TaskRow({
         )}
         <Link
           href={`/tasks/${task.id}`}
-          className="grid h-8 w-8 place-items-center rounded-md text-ink-3 hover:bg-surface-2 hover:text-ink"
+          className="grid h-11 w-11 place-items-center rounded-md text-ink-3 hover:bg-surface-2 hover:text-ink md:h-8 md:w-8"
           aria-label={`Open ${task.title}`}
         >
           <Icon name="chevronRight" size={16} />

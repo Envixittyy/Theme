@@ -1,3 +1,4 @@
+import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 import { signIn } from './helpers';
 
@@ -12,6 +13,18 @@ test.describe('sign-in', () => {
     await page.goto('/today');
     await page.waitForURL(/\/login/);
     await expect(page.getByRole('heading', { name: 'Sign in' })).toBeVisible();
+  });
+
+  test('the sign-in page has no accessibility violations', async ({ page }) => {
+    // Lives here rather than with the other accessibility checks: those run
+    // with a stored session, so /login would simply redirect to /today.
+    await page.goto('/login');
+    const results = await new AxeBuilder({ page })
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+      .analyze();
+    expect(
+      results.violations.map((v) => `${v.id} (${v.impact ?? 'unknown'})`),
+    ).toEqual([]);
   });
 
   test('a tampered sign-in link is refused', async ({ page }) => {

@@ -85,7 +85,9 @@ export default async function TasksPage({ searchParams }: { searchParams: Promis
       </header>
 
       <div className="grid gap-3 lg:grid-cols-[13rem_1fr]">
-        <nav aria-label="Task lists" className="lg:sticky lg:top-20 lg:self-start">
+        {/* min-w-0: without it this grid child sizes to the rail's full content
+            width and the whole page scrolls sideways on a phone. */}
+        <nav aria-label="Task lists" className="min-w-0 lg:sticky lg:top-20 lg:self-start">
           <ul className="flex gap-1.5 overflow-x-auto scroll-thin pb-1 lg:flex-col lg:overflow-visible">
             {SYSTEM_SMART_LISTS.map((list) => {
               const active = list.key === listKey;

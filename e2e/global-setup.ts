@@ -48,9 +48,14 @@ export default async function globalSetup(): Promise<() => Promise<void>> {
     });
   });
 
-  await new Promise<void>((resolve) => server.listen(4599, '127.0.0.1', resolve));
+  // If a previous run left its catcher listening, reuse it rather than dying:
+  // both write the link to the same file, which is all the tests need.
+  const listening = await new Promise<boolean>((resolve) => {
+    server.once('error', () => resolve(false));
+    server.listen(4599, '127.0.0.1', () => resolve(true));
+  });
 
   return async () => {
-    await new Promise<void>((resolve) => server.close(() => resolve()));
+    if (listening) await new Promise<void>((resolve) => server.close(() => resolve()));
   };
 }

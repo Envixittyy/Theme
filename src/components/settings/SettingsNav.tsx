@@ -18,7 +18,9 @@ const SECTIONS = [
 export function SettingsNav() {
   const pathname = usePathname();
   return (
-    <nav aria-label="Settings sections" className="lg:sticky lg:top-20 lg:self-start">
+    // min-w-0 for the same reason as the task list rail: the horizontal
+    // scroller must scroll itself, not the document.
+    <nav aria-label="Settings sections" className="min-w-0 lg:sticky lg:top-20 lg:self-start">
       <ul className="flex gap-1.5 overflow-x-auto scroll-thin pb-1 lg:flex-col lg:overflow-visible">
         {SECTIONS.map((section) => {
           const active = section.exact ? pathname === section.href : pathname.startsWith(section.href);
