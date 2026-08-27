@@ -2,7 +2,7 @@
   "name": "mapua-school-os",
   "version": "0.4.0",
   "private": true,
-  "description": "Mapua School OS — an academic productivity workspace: tasks, calendar, courses, Blackboard + Notion sync, notifications, offline PWA, optional local AI.",
+  "description": "Mapua School OS \u2014 an academic productivity workspace: tasks, calendar, courses, Blackboard + Notion sync, notifications, offline PWA, optional local AI.",
   "engines": {
     "node": ">=22"
   },
@@ -20,7 +20,8 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "typecheck": "tsc --noEmit",
-    "lint": "next lint"
+    "lint": "next lint",
+    "check": "npm run typecheck && npm test && node --check bridge/school-os-bridge.mjs"
   },
   "dependencies": {
     "@electric-sql/pglite": "0.5.7",
