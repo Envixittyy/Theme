@@ -840,6 +840,9 @@ export const userPreferences = pgTable('user_preferences', {
   notificationKinds: jsonb('notification_kinds').notNull().default({}),
   courseNotificationOptOut: jsonb('course_notification_opt_out').notNull().default({}),
 
+  /** Opaque token for the read-only calendar feed. Rotatable; null = disabled. */
+  calendarFeedToken: text('calendar_feed_token'),
+
   localAiEnabled: boolean('local_ai_enabled').notNull().default(false),
   localAiIndexingEnabled: boolean('local_ai_indexing_enabled').notNull().default(false),
 

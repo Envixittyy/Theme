@@ -9,17 +9,7 @@ import { DEFAULT_TIME_ZONE } from '../shared/time';
 export type CourseRow = typeof courses.$inferSelect;
 export type MeetingRow = typeof courseMeetings.$inferSelect;
 
-/** A restrained palette that stays legible on both themes. */
-export const COURSE_PALETTE = [
-  '#8c1d24',
-  '#b8860b',
-  '#1f6f8b',
-  '#1f6d4a',
-  '#6b4b9a',
-  '#a8531f',
-  '#2f5d8a',
-  '#7a1f52',
-] as const;
+export { COURSE_PALETTE } from './course-palette';
 
 export async function listCourses(userId: string, includeArchived = false): Promise<CourseRow[]> {
   const db = await getDb();

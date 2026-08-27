@@ -283,3 +283,63 @@ time,
   .no-print { display: none !important; }
   body { background: #fff; color: #000; }
 }
+
+/* ---------------------------------------------------------------------------
+   Note rendering
+   The renderer emits a fixed set of classes (see components/notes/markdown.ts),
+   so styling stays here rather than inline in the renderer.
+--------------------------------------------------------------------------- */
+.prose-note .md-h { font-weight: 600; letter-spacing: -0.01em; margin: 1.1em 0 0.4em; }
+.prose-note h2.md-h { font-size: 1.25rem; }
+.prose-note h3.md-h { font-size: 1.1rem; }
+.prose-note h4.md-h { font-size: 1rem; }
+.prose-note h5.md-h { font-size: 0.95rem; color: var(--c-ink-2); }
+.prose-note p { margin: 0.5em 0; }
+.prose-note .md-list { margin: 0.4em 0 0.6em 1.1em; }
+.prose-note .md-list li { margin: 0.2em 0; }
+.prose-note ul.md-list { list-style: disc; }
+.prose-note ol.md-list { list-style: decimal; }
+.prose-note .md-tasks { list-style: none; margin-left: 0.1em; }
+.prose-note .md-tasks li { display: flex; align-items: baseline; gap: 0.5em; }
+.prose-note .md-done { color: var(--c-ink-3); text-decoration: line-through; }
+.prose-note .md-code {
+  font-family: var(--font-mono);
+  font-size: 0.86em;
+  background: var(--c-surface-2);
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+}
+.prose-note .md-pre {
+  background: var(--c-surface-2);
+  border: 1px solid var(--c-line);
+  border-radius: var(--r-md);
+  padding: 0.75rem;
+  overflow-x: auto;
+  font-size: 0.86em;
+  margin: 0.6em 0;
+}
+.prose-note .md-quote {
+  border-left: 3px solid var(--c-accent);
+  padding-left: 0.85em;
+  color: var(--c-ink-2);
+  margin: 0.6em 0;
+}
+.prose-note .md-hr { border: 0; border-top: 1px solid var(--c-line); margin: 1.2em 0; }
+.prose-note .md-link { color: var(--c-brand); text-decoration: underline; }
+.prose-note .md-wikilink {
+  color: var(--c-info);
+  border-bottom: 1px dashed currentColor;
+}
+.prose-note .md-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.6em 0;
+  font-size: 0.92em;
+  display: block;
+  overflow-x: auto;
+}
+.prose-note .md-table td {
+  border: 1px solid var(--c-line);
+  padding: 0.35em 0.55em;
+}
+.prose-note .md-table tr:first-child td { background: var(--c-surface-2); font-weight: 600; }

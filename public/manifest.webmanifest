@@ -1,0 +1,26 @@
+{
+  "name": "Mapua School OS",
+  "short_name": "School OS",
+  "description": "Classes, deadlines, Blackboard items, notes and announcements in one place.",
+  "start_url": "/today?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "any",
+  "background_color": "#faf6f2",
+  "theme_color": "#8c1d24",
+  "categories": ["education", "productivity"],
+  "lang": "en",
+  "dir": "ltr",
+  "icons": [
+    { "src": "/icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Today", "url": "/today", "description": "Classes and deadlines for today" },
+    { "name": "Add task", "url": "/tasks?quickadd=1", "description": "Capture something quickly" },
+    { "name": "Calendar", "url": "/calendar", "description": "Month, week, agenda and timetable" }
+  ]
+}

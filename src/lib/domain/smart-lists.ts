@@ -69,9 +69,11 @@ export function buildTaskFilter(query: SmartListQuery, ctx: SmartListContext): S
   if (query.statuses?.length) {
     clauses.push(inArray(tasks.status, query.statuses));
   } else {
-    // Archived work is never in a list unless explicitly asked for.
+    // Archived work is never in a list unless explicitly asked for. Finished
+    // work -- both Done and Submitted -- is also out by default: a planning
+    // list is about what is left, and both states have their own list.
     clauses.push(sql`${tasks.status} <> 'archived'`);
-    if (!query.includeCompleted) clauses.push(sql`${tasks.status} <> 'done'`);
+    if (!query.includeCompleted) clauses.push(sql`${tasks.status} not in ('done','submitted')`);
   }
 
   if (query.types?.length) clauses.push(inArray(tasks.type, query.types));
