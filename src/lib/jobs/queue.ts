@@ -111,8 +111,36 @@ export async function claimNext(workerId: string): Promise<JobRow | null> {
     )
     RETURNING *;
   `);
-  const rows = (result as unknown as { rows?: JobRow[] }).rows ?? (result as unknown as JobRow[]);
-  return rows[0] ?? null;
+  // `db.execute` returns raw driver rows, so the columns arrive snake_cased and
+  // untyped. They are mapped explicitly here: leaving them raw silently gives
+  // every caller `undefined` for `attempts` and `maxAttempts`, which would mean
+  // a failing job retries forever instead of dead-lettering.
+  const rows = (result as unknown as { rows?: RawJobRow[] }).rows ?? (result as unknown as RawJobRow[]);
+  const row = rows[0];
+  return row ? mapJobRow(row) : null;
+}
+
+type RawJobRow = Record<string, unknown>;
+
+function mapJobRow(row: RawJobRow): JobRow {
+  const date = (value: unknown): Date | null => (value ? new Date(value as string) : null);
+  return {
+    id: row.id as string,
+    kind: row.kind as string,
+    userId: (row.user_id as string | null) ?? null,
+    payload: (row.payload as Record<string, unknown>) ?? {},
+    state: row.state as JobRow['state'],
+    runAt: date(row.run_at) ?? new Date(),
+    attempts: Number(row.attempts ?? 0),
+    maxAttempts: Number(row.max_attempts ?? 5),
+    idempotencyKey: (row.idempotency_key as string | null) ?? null,
+    lockKey: (row.lock_key as string | null) ?? null,
+    lockedAt: date(row.locked_at),
+    lockedBy: (row.locked_by as string | null) ?? null,
+    lastError: (row.last_error as string | null) ?? null,
+    createdAt: date(row.created_at) ?? new Date(),
+    finishedAt: date(row.finished_at),
+  };
 }
 
 export async function completeJob(id: string): Promise<void> {

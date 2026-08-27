@@ -758,7 +758,14 @@ export const notificationDeliveries = pgTable(
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [
+    // Per-device uniqueness for push rows.
     uniqueIndex('notification_deliveries_event_target_key').on(t.eventId, t.channel, t.subscriptionId),
+    // The in-app row has no subscription, and Postgres treats NULLs as
+    // distinct, so it needs its own partial index -- without it a retried
+    // delivery job appends a duplicate in-app record on every attempt.
+    uniqueIndex('notification_deliveries_event_inapp_key')
+      .on(t.eventId, t.channel)
+      .where(sql`${t.subscriptionId} is null`),
     index('notification_deliveries_user_idx').on(t.userId),
   ],
 );

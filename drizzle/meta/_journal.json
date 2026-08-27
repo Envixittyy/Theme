@@ -15,6 +15,13 @@
       "when": 1787764292565,
       "tag": "0001_calendar_feed_token",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1787795479490,
+      "tag": "0002_delivery_inapp_unique",
+      "breakpoints": true
     }
   ]
 }

@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "notification_deliveries_event_inapp_key" ON "notification_deliveries" USING btree ("event_id","channel") WHERE "notification_deliveries"."subscription_id" is null;

@@ -142,15 +142,19 @@ export async function assertSafeUrl(
   policy: SsrfPolicy = defaultPolicy(),
   resolver: Resolver = realResolver,
 ): Promise<ValidatedTarget> {
+  // Blackboard publishes personal feeds as webcal:// links. Normalise before
+  // parsing: `webcal` is not a "special" scheme, so assigning `url.protocol`
+  // afterwards is silently ignored by the URL parser.
+  const normalized = /^webcals?:\/\//i.test(rawUrl.trim())
+    ? rawUrl.trim().replace(/^webcals?:\/\//i, 'https://')
+    : rawUrl;
+
   let url: URL;
   try {
-    url = new URL(rawUrl);
+    url = new URL(normalized);
   } catch {
     throw new UnsafeUrlError('not a valid absolute URL');
   }
-
-  // Blackboard publishes personal feeds as webcal:// links; normalise, don't reject.
-  if (url.protocol === 'webcal:') url.protocol = 'https:';
 
   if (url.protocol !== 'https:' && !(policy.allowHttp && url.protocol === 'http:')) {
     throw new UnsafeUrlError(`scheme "${url.protocol}" is not allowed`, rawUrl);

@@ -106,13 +106,19 @@ function remoteSnapshot(page: NotionPage, mapping: FieldMapping): { snapshot: Sn
 
   const due = mapping.dueDate ? readDate(props[mapping.dueDate]) : { start: null, hasTime: false };
 
+  // `undefined` means "this field takes no part in the merge"; `null` means
+  // "genuinely empty upstream". The distinction matters for fields the local
+  // model always has a value for -- a task is always in *some* status -- where
+  // an unset Notion property means the student never set it, not that they
+  // cleared it. Treating those as null would make the local default look like a
+  // local edit and push it back on the next run.
   return {
     snapshot: {
-      title: readTitle(props[mapping.title]) || null,
+      title: readTitle(props[mapping.title]) || undefined,
       dueAt: due.start?.toISOString() ?? null,
-      status: status.status,
-      priority,
-      type,
+      status: status.status ?? undefined,
+      priority: priority ?? undefined,
+      type: type ?? undefined,
       submitted: mapping.submitted ? String(readCheckbox(props[mapping.submitted])) : undefined,
       notes: mapping.notes ? readRichText(props[mapping.notes]) || null : undefined,
       courseCode: mapping.course ? readRelationOrText(props[mapping.course]) : null,
@@ -328,6 +334,13 @@ async function applyRemotePage(
       })
       .returning();
 
+    // The merge ancestor is the *local* snapshot, not the remote one. A page
+    // that leaves Status or Type unset still produces a task with defaults, and
+    // recording the remote nulls as the ancestor would make those defaults look
+    // like local edits and push them straight back into Notion.
+    const createdCourseCode = course?.code ?? remote.courseCode ?? null;
+    const ancestor = localSnapshot(task!, createdCourseCode);
+
     const [created] = await db
       .insert(externalRecords)
       .values({
@@ -348,7 +361,7 @@ async function applyRemotePage(
         localRevision: task!.revision,
         lastSeenAt: ctx.now,
         reviewReason: unmapped.length ? `unmapped: ${unmapped.join(', ')}` : null,
-        payload: { lastApplied: remote },
+        payload: { lastApplied: ancestor },
       })
       .returning();
 
@@ -482,7 +495,10 @@ async function applyRemotePage(
       dueAt: remote.dueAt ? new Date(remote.dueAt) : null,
       normalizedTitle: (remote.title ?? '').toLowerCase(),
       courseCode: remote.courseCode ?? null,
-      localRevision: task.revision + (Object.keys(merge.apply).length ? 1 : 0),
+      // `localRevision` deliberately stays put: it means "the local revision we
+      // last *pushed*". A pull raises the task's revision without sending
+      // anything, and advancing it here would hide an unpushed local edit from
+      // the push phase for good.
       reviewReason: unmapped.length ? `unmapped: ${unmapped.join(', ')}` : null,
       payload: { lastApplied: { ...base, ...merge.apply } },
     })
@@ -604,15 +620,10 @@ async function pushLocalChanges(
     .limit(200);
 
   for (const { record, task } of linked) {
-    // Never push straight back what the pull just wrote.
-    if (task.lastWriteOrigin === 'notion') {
-      await db
-        .update(externalRecords)
-        .set({ localRevision: task.revision })
-        .where(eq(externalRecords.id, record.id));
-      continue;
-    }
-
+    // Loop protection is the *base snapshot*, not `lastWriteOrigin`: after a
+    // pull applies a remote change, that field's base equals the local value,
+    // so there is nothing to push back. Using the origin flag instead would
+    // strand a local edit that happened to be merged in the same run.
     const courseCode = task.courseId ? await courseCodeFor(db, task.courseId) : null;
     const local = localSnapshot(task, courseCode);
     const base = ((record.payload as { lastApplied?: Snapshot } | null)?.lastApplied ?? {}) as Snapshot;

@@ -195,6 +195,9 @@ export async function deliverNotification(eventId: string): Promise<{ sent: numb
   await db
     .insert(notificationDeliveries)
     .values({ eventId, userId: event.userId, channel: 'in_app', state: 'sent', attemptedAt: new Date() })
+    // Untargeted ON CONFLICT DO NOTHING: it needs no index inference, and the
+    // partial unique index on (event, channel) WHERE subscription_id IS NULL is
+    // what actually keeps a retried job from adding a second in-app record.
     .onConflictDoNothing();
 
   const provider = getPushProvider();
